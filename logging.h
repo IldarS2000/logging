@@ -1,29 +1,38 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
-#ifndef HEADER_H
-#define HEADER_H
+#ifndef LOGGING_H
+#define LOGGING_H
 
-//#if __STDC_VERSION__ < 199901L
-//# if __GNUC__ >= 2
-//#  define __func__ __FUNCTION__
-//# else
-//#  define __func__ "<unknown function>"
-//# endif
-//#endif
+#define DEBUG
+#ifdef DEBUG
 
-#ifdef DEBUG 
-#define log(...) do { \
-  char buffer[20]; \
+#ifdef _WIN32
+#define __SHORT_FILE__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#else
+#define __SHORT_FILE__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#endif
+
+#define LOG_HELPER(format, loglevel, ...) \
+do { \
+  char message[1024] = {0}; \
+  char bufferTime[20] = {0}; \
   time_t now = time(0); \
   struct tm* sTm = gmtime(&now); \
-  strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", sTm); \
-  printf("[%s:%d %s]: ", __FILE__, __LINE__, __func__); \
-  printf(##__VA_ARGS__); \
+  strftime(bufferTime, sizeof(bufferTime), "%Y-%m-%d %H:%M:%S", sTm); \
+  sprintf_s(message, 1024, "%s [%s] [%s] [%s:%d] %s", \
+            bufferTime, loglevel, __func__, __SHORT_FILE__, __LINE__, format, ##__VA_ARGS__); \
+  printf(message); \
 } while (0);
 #else
-#define log(...) do { \
-} while (0);
+#define LOG_HELPER(...)
 #endif // DEBUG
 
-#endif // HEADER_H
+#define LOG_DEBUG(format, ...) LOG_HELPER(format, "DEBUG", ## __VA_ARGS__)
+#define LOG_INFO(format, ...) LOG_HELPER(format, "INFO", ## __VA_ARGS__)
+#define LOG_WARN(format, ...) LOG_HELPER(format, "WARN", ## __VA_ARGS__)
+#define LOG_ERROR(format, ...) LOG_HELPER(format, "ERROR", ## __VA_ARGS__)
+
+#endif // LOGGING_H
