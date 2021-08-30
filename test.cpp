@@ -1,11 +1,11 @@
-#define DEBUG
 #include "logging.h"
-
 
 int main()
 {
-  log("message 1\n");
-  log("message 2\n");
+  LOG_DEBUG("message\n");
+  LOG_INFO("message\n");
+  LOG_WARN("message\n");
+  LOG_ERROR("message\n");
 
   return 0;
 }
